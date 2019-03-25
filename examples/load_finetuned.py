@@ -33,29 +33,14 @@ import codecs
 import sys
 import numpy as np
 TEST_SENTENCES = codecs.open(sys.argv[1], 'r', encoding='utf-8').readlines()
-
-# TEST_SENTENCES = ['i had trouble sleeping on days when i took it',
-#                   'the audio is pretty mundane with japanese audio tracks to cover the horrible english voice actresses..',
-#                   'here on amazon ,  this was too expensive for this',
-#                   'i m surprised no one has sued the company for manufacturing this awkward ,  uncomfortable ,  dangerous product',
-#                   'they make much more reliable mice and i never had a problem with them',
-#                   'this was a bad purchase ,  after using a month for water ,  something grew on the stainless inside wall',
-#                   'i cleaned it thinking that maybe that would help ,  but to no avail']
-# TEST_SENTENCES = [unicode(s) for s in TEST_SENTENCES]
-
-print('Loading model.')
+print('Loading model: ', sys.argv[2])
 with CustomObjectScope({'AttentionWeightedAverage': AttentionWeightedAverage}):
-    # model = load_model("/home/ubuntu/akhilesh_data/DeepMoji/model/model/amazon_chain_thaw/m.hdf5")
-    model = load_model("/home/ubuntu/akhilesh_data/DeepMoji/model/model/yelp_chain_thaw/m.hdf5")
+    model = load_model(sys.argv[2])
 model.summary()
 
 with open('../model/vocabulary.json', 'r') as f:
     vocab = json.load(f)
 
-# Load dataset. Extend the existing vocabulary with up to 10000 tokens from
-# the training dataset.
-DATASET_PATH = '../data/yelp/raw.pickle'
-# data = load_benchmark(DATASET_PATH, vocab, extend_with=10000)
 st = SentenceTokenizer(vocab, 20)
 tokenized, _, _ = st.tokenize_sentences(TEST_SENTENCES)
 
@@ -72,8 +57,7 @@ intermediate_layer_model = Model(inputs=model.input,
 print('Running predictions.')
 prob = model.predict(tokenized)
 _, att_weights = intermediate_layer_model.predict(tokenized)
-fo = codecs.open(sys.argv[2], 'w', encoding='utf-8')
-# fo = codecs.open('/tmp/waste.txt', 'w', encoding='utf-8')
+fo = codecs.open(sys.argv[3], 'w', encoding='utf-8')
 for ind, (atts, prob) in enumerate(zip(att_weights, prob)):
     label = '+ve' if prob[0] > 0.5 else '-ve'
     fo.write("{}\nLABEL: {}\n".format(TEST_SENTENCES[ind], label))
