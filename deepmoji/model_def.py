@@ -14,7 +14,6 @@ from copy import deepcopy
 from os.path import exists
 import h5py
 
-
 def deepmoji_feature_encoding(maxlen, weight_path, return_attention=False):
     """ Loads the pretrained DeepMoji model for extracting features
         from the penultimate feature layer. In this way, it transforms
@@ -148,9 +147,8 @@ def deepmoji_architecture(nb_classes, nb_tokens, maxlen, feature_output=False, e
     # if return_attention is True in AttentionWeightedAverage, an additional tensor
     # representing the weight at each timestep is returned
     weights = None
-    x = AttentionWeightedAverage(name='attlayer', return_attention=return_attention)(x)
-    if return_attention:
-        x, weights = x
+    x = AttentionWeightedAverage(name='attlayer', return_attention=True)(x)
+    x, weights = x
 
     if not feature_output:
         # output class probabilities
@@ -168,6 +166,7 @@ def deepmoji_architecture(nb_classes, nb_tokens, maxlen, feature_output=False, e
     if return_attention:
         # add the attention weights to the outputs if required
         outputs.append(weights)
+
 
     return Model(inputs=[model_input], outputs=outputs, name="DeepMoji")
 

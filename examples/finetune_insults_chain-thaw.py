@@ -23,9 +23,15 @@ from deepmoji.global_variables import PRETRAINED_PATH
 from deepmoji.finetuning import (
     load_benchmark,
     finetune)
+import pickle
+import time
 
+from keras.models import load_model
+s= time.time()
+# DATASET_PATH = '../data/amazon/raw.pickle'
+DATASET_PATH = '../data/yelp/raw.pickle'
+dataset = pickle.load(open(DATASET_PATH, 'rb'))
 
-DATASET_PATH = '../data/kaggle-insults/raw.pickle'
 nb_classes = 2
 
 with open('../model/vocabulary.json', 'r') as f:
@@ -39,7 +45,13 @@ data = load_benchmark(DATASET_PATH, vocab, extend_with=10000)
 # with the number of tokens added to the vocabulary.
 model = deepmoji_transfer(nb_classes, data['maxlen'], PRETRAINED_PATH,
                           extend_embedding=data['added'])
+layers = model.layers
 model.summary()
+# Available options for method: ['last', 'full', 'new', 'chain-thaw']
 model, acc = finetune(model, data['texts'], data['labels'], nb_classes,
                       data['batch_size'], method='chain-thaw')
 print('Acc: {}'.format(acc))
+print('TIME TAKEN:', time.time()-s)
+#
+# model.save("/home/ubuntu/akhilesh_data/DeepMoji/model/model/amazon_chain_thaw/m.hdf5")
+model.save("/home/ubuntu/akhilesh_data/DeepMoji/model/model/yelp_chain_thaw/m.hdf5")

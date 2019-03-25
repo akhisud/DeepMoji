@@ -1,2 +1,0 @@
-model_checkpoint_path: "emoji.ckpt"
-all_model_checkpoint_paths: "emoji.ckpt"
